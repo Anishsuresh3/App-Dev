@@ -14,7 +14,8 @@ class DatabaseService{
       'Name' : name,
       'email' : email,
       'points' : 0,
-      'rank' : 0
+      'rank' : 0,
+      'isDrawing':false
     });
   }
 
@@ -24,7 +25,4 @@ class DatabaseService{
   Stream<QuerySnapshot> get player {
     return playerCollection.snapshots();
   }
-
-
-
 }

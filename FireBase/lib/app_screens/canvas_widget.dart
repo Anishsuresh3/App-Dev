@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 
+
 class Draw extends StatefulWidget{
   final CollectionReference roomParticipants;
   String roomId;
@@ -34,14 +35,21 @@ class _DrawState extends State<Draw>{
   //   draw();
   // }
 
-  Future<void> _addpointslist(DrawModel points) async {
+  Future<void> _addpointslist(DrawModel? points) async {
     try{
-      await pointsCollection.doc((count++).toString()).set({
-        'x':points.offset.dx,
-        'y':points.offset.dy,
-        'color':points.paint.color.value,
-        'strokewidth':points.paint.strokeWidth
-      });
+      if(points==null){
+        await pointsCollection.doc((count++).toString()).set({
+          'null':null,
+        });
+      }
+      else {
+        await pointsCollection.doc((count++).toString()).set({
+          'x': points.offset.dx,
+          'y': points.offset.dy,
+          'color': points.paint.color.value,
+          'strokewidth': points.paint.strokeWidth
+        });
+      }
     }catch(e){
       debugPrint(e.toString());
     }
@@ -104,8 +112,8 @@ class _DrawState extends State<Draw>{
           //   debugPrint('offset=${point!.offset}, paint=${point.paint}');
           // });
           setState(() {
-            // pointsList.add(null);
-            // _addpointslist(pointsList.last!);
+            pointsList.add(null);
+            _addpointslist(pointsList.last);
             // pointsStream.add(pointsList);
             _isDrawing = false;
           });
@@ -136,28 +144,33 @@ class _DrawState extends State<Draw>{
               );
             }
             List<DocumentSnapshot> documents = snapshot.data!.docs;
-            // pointsList = documents.map((doc) {
-            //   // debugPrint(doc.id.toString());
-            //   return DrawModel(
-            //       Offset(doc.get('x'),doc.get('y')),
-            //       Paint()
-            //         ..color = Color(doc.get('color'))
-            //         ..strokeWidth = doc.get('strokewidth'),
-            //   );
-            // }).toList();
+            pointslist = documents.map((doc) {
+              // debugPrint(doc.id.toString());
+              if(doc.data().toString()=='{null: null}'){
+                return null;
+              }
+              else{
+                return DrawModel(
+                  Offset(doc.get('x'),doc.get('y')),
+                  Paint()
+                    ..color = Color(doc.get('color'))
+                    ..strokeWidth = doc.get('strokewidth'),
+                );
+              }
+            }).toList();
 
-            while(i<documents.length){
-              // debugPrint(i.toString());
-              DocumentSnapshot doc = documents[i];
-              pointslist.add(DrawModel(
-                      Offset(doc.get('x'),doc.get('y')),
-                      Paint()
-                        ..color = Color(doc.get('color'))
-                        ..strokeWidth = doc.get('strokewidth'),
-                  ));
-              i++;
-            }
-            pointslist.add(null);
+            // while(i<documents.length){
+            //   // debugPrint(i.toString());
+            //   DocumentSnapshot doc = documents[i];
+            //   pointslist.add(DrawModel(
+            //           Offset(doc.get('x'),doc.get('y')),
+            //           Paint()
+            //             ..color = Color(doc.get('color'))
+            //             ..strokeWidth = doc.get('strokewidth'),
+            //       ));
+            //   i++;
+            // }
+            // pointslist.add(null);
             // pointsList.forEach((point) {
             //   debugPrint('offset=${point!.offset}, paint=${point.paint}');
             // });
